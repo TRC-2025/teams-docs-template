@@ -1,0 +1,56 @@
+name: Create Team Documentation Repository
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  create-repo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Extract Team Info from Issue
+        id: extract
+        run: |
+          echo "TEAM_NAME=${{ github.event.issue.title }}" >> $GITHUB_ENV
+          echo "TEAM_MEMBERS=$(echo '${{ github.event.issue.body }}' | grep -i 'GitHub Username(s):' | cut -d ':' -f2 | tr -d ' \r')" >> $GITHUB_ENV
+
+      - name: Create Repository from Template
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PAT_FOR_AUTOMATION }}
+          script: |
+            const teamName = process.env.TEAM_NAME.toLowerCase().replace(/ /g, '-');
+            const org = context.repo.owner;
+            const repoName = `docs-${teamName}`;
+
+            const result = await github.rest.repos.createUsingTemplate({
+              template_owner: org,
+              template_repo: "team-docs-template",
+              owner: org,
+              name: repoName,
+              private: false,
+            });
+
+            console.log(`✅ Repository created: ${result.data.full_name}`);
+
+      - name: Add Team Members as Collaborators
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PAT_FOR_AUTOMATION }}
+          script: |
+            const teamName = process.env.TEAM_NAME.toLowerCase().replace(/ /g, '-');
+            const org = context.repo.owner;
+            const repoName = `docs-${teamName}`;
+            const raw = process.env.TEAM_MEMBERS;
+            const members = raw.split(',').map(u => u.trim()).filter(Boolean);
+
+            for (const username of members) {
+              await github.rest.repos.addCollaborator({
+                owner: org,
+                repo: repoName,
+                username,
+                permission: 'push'
+              });
+              console.log(`👥 Added ${username} as collaborator to ${repoName}`);
+            }
