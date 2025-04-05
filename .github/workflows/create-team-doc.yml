@@ -27,7 +27,7 @@ jobs:
             try {
             const result = await github.rest.repos.createUsingTemplate({
               template_owner: org,
-              template_repo: "team-docs-template",
+              template_repo: "teams-docs-template",
               owner: org,
               name: repoName,
               private: false,
