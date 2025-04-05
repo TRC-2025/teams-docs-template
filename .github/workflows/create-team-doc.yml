@@ -21,7 +21,7 @@ jobs:
           github-token: ${{ secrets.PAT_FOR_AUTOMATION }}
           script: |
             const teamName = process.env.TEAM_NAME.toLowerCase().replace(/ /g, '-');
-            const org = TRC-2025;
+            const org = "TRC-2025";
             const repoName = `docs-${teamName}`;
 
             const result = await github.rest.repos.createUsingTemplate({
@@ -40,7 +40,7 @@ jobs:
           github-token: ${{ secrets.PAT_FOR_AUTOMATION }}
           script: |
             const teamName = process.env.TEAM_NAME.toLowerCase().replace(/ /g, '-');
-            const org = TRC-2025;
+            const org = "TRC-2025";
             const repoName = `docs-${teamName}`;
             const raw = process.env.TEAM_MEMBERS;
             const members = raw.split(',').map(u => u.trim()).filter(Boolean);
